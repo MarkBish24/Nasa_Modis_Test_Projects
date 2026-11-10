@@ -1,0 +1,5 @@
+# raw monthly composites (~100+ MB, re-creatable with `python3 main.py fetch`)
+data_raw/
+.venv/
+__pycache__/
+.DS_Store

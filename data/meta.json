@@ -1,0 +1,75 @@
+{
+  "title": "MODIS-Aqua chlorophyll-a monthly climatology",
+  "source": "NASA GIBS layer MODIS_Aqua_L2_Chlorophyll_A (daily), colormap MODIS_Chlorophyll.xml",
+  "years": [
+    2003,
+    2022
+  ],
+  "n_monthly_composites": 240,
+  "width": 720,
+  "height": 360,
+  "cell_deg": 0.5,
+  "lon_min": -180,
+  "lat_max": 90,
+  "layout": "month-major uint8 [12][height][width], row 0 = northernmost",
+  "encoding": "0 = no data; v in 1..255 -> log10(chl) = log_min + (v-1)/254*(log_max-log_min)",
+  "log_min": -2.0,
+  "log_max": 1.3010299956639813,
+  "units": "mg/m^3",
+  "min_years_per_cell": 3,
+  "min_daily_samples_per_cell": 20,
+  "max_solar_zenith_deg": 72.0,
+  "regions": {
+    "North Atlantic": {
+      "lon": [
+        -40,
+        -15
+      ],
+      "lat": [
+        45,
+        60
+      ]
+    },
+    "Southern Ocean": {
+      "lon": [
+        -50,
+        0
+      ],
+      "lat": [
+        -60,
+        -45
+      ]
+    },
+    "Arabian Sea": {
+      "lon": [
+        55,
+        70
+      ],
+      "lat": [
+        10,
+        22
+      ]
+    },
+    "Equatorial Pacific": {
+      "lon": [
+        -140,
+        -100
+      ],
+      "lat": [
+        -3,
+        3
+      ]
+    },
+    "North Pacific Gyre": {
+      "lon": [
+        -160,
+        -140
+      ],
+      "lat": [
+        18,
+        28
+      ]
+    }
+  },
+  "generated": "2026-11-05"
+}

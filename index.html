@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Ocean's Green Pulse</title>
+  <meta name="description" content="An interactive map of when and where the ocean blooms: monthly chlorophyll-a from NASA's MODIS-Aqua satellite, 2003–2022.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="intro">
+    <p class="kicker">DSC 106 · Project 3 · NASA MODIS-Aqua ocean color</p>
+    <h1>The Ocean's Green Pulse</h1>
+    <p class="dek">
+      Phytoplankton make about half of the oxygen on Earth, and they tint the sea green as they grow.
+      Satellites read that tint as <strong>chlorophyll-a</strong>. When and where does the ocean bloom,
+      and why does each region bloom at a different time of year?
+    </p>
+    <p class="subtitle" id="subtitle">
+      Average chlorophyll-a for each calendar month, 2003–2022. Daily MODIS-Aqua images from NASA GIBS were
+      converted back to mg/m³ using the published color scale, averaged into monthly composites on a 0.5° grid
+      (geometric means, cloud-free pixels only), then averaged across years.
+    </p>
+  </header>
+
+  <main>
+    <section class="viz" aria-label="Interactive chlorophyll map">
+      <div class="stories" role="group" aria-label="Guided stories">
+        <span class="stories-label">Explore:</span>
+        <button class="story" data-story="atlantic">1 · North Atlantic spring bloom</button>
+        <button class="story" data-story="south">2 · The south blooms six months later</button>
+        <button class="story" data-story="arabian">3 · Monsoon-fed Arabian Sea</button>
+        <button class="story" data-story="deserts">4 · Ocean deserts</button>
+        <button class="story" data-story="calendar">5 · A calendar of blooms</button>
+      </div>
+      <div class="narrative" id="narrative" aria-live="polite"></div>
+
+      <div class="controls">
+        <div class="segmented" role="radiogroup" aria-label="Measure shown on the map">
+          <button role="radio" data-measure="conc">Chlorophyll</button>
+          <button role="radio" data-measure="anom">vs. annual average</button>
+          <button role="radio" data-measure="peak">Peak month</button>
+        </div>
+        <div class="month-control" id="month-control">
+          <button id="play" class="play" aria-label="Play the seasonal cycle">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path id="play-icon" d="M4 2.5v11l9-5.5z"/></svg>
+          </button>
+          <div class="slider-wrap">
+            <input type="range" id="month" min="0" max="11" step="1" value="4" aria-label="Month">
+            <div class="ticks" id="month-ticks" aria-hidden="true"></div>
+          </div>
+          <output id="month-label" for="month" class="month-label">May</output>
+        </div>
+      </div>
+
+      <div class="map-row" id="map-row">
+        <div class="map-wrap" id="map-wrap">
+          <canvas id="map-canvas" role="img" aria-label="World map of ocean chlorophyll"></canvas>
+          <svg id="map-svg" aria-hidden="true"></svg>
+        </div>
+        <div class="lat-wrap">
+          <svg id="lat-svg" aria-label="Average chlorophyll by latitude and month" role="img"></svg>
+        </div>
+      </div>
+      <div class="legend-row">
+        <svg id="legend" aria-label="Color legend" role="img"></svg>
+        <p class="hint">Hover for values. <strong>Click</strong> a spot or <strong>drag a box</strong> on the map to chart its seasonal cycle below (up to 3 at once). The right-hand panel averages each latitude band.</p>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-head">
+          <h2 id="chart-title">Seasonal cycle of the selected regions</h2>
+          <div class="pins" id="pins"></div>
+          <button class="ghost" id="clear-pins">Clear</button>
+        </div>
+        <svg id="chart" role="img" aria-label="Seasonal cycle chart"></svg>
+        <details class="table-view">
+          <summary>Show as a table</summary>
+          <div id="table-wrap"></div>
+        </details>
+      </div>
+    </section>
+
+    <div class="tooltip" id="tooltip" role="status" hidden></div>
+    <div class="toast" id="toast" role="status" hidden></div>
+
+    <article class="writeup" id="writeup">
+      <h2>Write-up</h2>
+
+      <h3>The question</h3>
+      <p>
+        <em>When does the ocean bloom, and why does the timing differ from place to place?</em>
+        Ocean-color satellites see phytoplankton through the green pigment chlorophyll-a. A single annual-average
+        map shows <em>where</em> the ocean is productive, but it hides the seasons. The North Atlantic and the
+        Southern Ocean can have similar averages and still bloom half a year apart. We wanted a view in which
+        that timing is the main thing you see.
+      </p>
+
+      <h3>Data and transformations</h3>
+      <ul>
+        <li><strong>Source.</strong> NASA GIBS layer <code>MODIS_Aqua_L2_Chlorophyll_A</code>: daily global
+          imagery from the MODIS sensor on the Aqua satellite. We requested one 720 × 360 image (0.5° per pixel)
+          per day for 2003–2022 through the GIBS WMS API. That is 7,305 images. We also downloaded 2023–2024 but left them out: Aqua's orbit has been drifting toward later, lower-sun overpasses, and 2024 shows a clear winter artifact.</li>
+        <li><strong>Colors → numbers.</strong> GIBS serves pictures, not values. Each pixel is one of 255 colors,
+          and GIBS publishes the chlorophyll range that each color stands for
+          (<code>MODIS_Chlorophyll.xml</code>; log-spaced bins from 0.01 to 20 mg/m³). We matched every pixel to
+          its exact color entry and took the log-midpoint of its bin. Transparent pixels (clouds, sea ice, land,
+          gaps between satellite passes, polar night) count as missing.</li>
+        <li><strong>Monthly composites.</strong> For each month of each year we averaged all valid daily pixels
+          in log space. That is a geometric mean, which suits chlorophyll because its values are roughly
+          log-normal (see exploration graph 2).</li>
+        <li><strong>Climatology.</strong> For each calendar month we averaged the 20 yearly values. A cell is
+          shown only if at least 3 years and at least 20 daily observations had data that month. We also drop a
+          latitude for a month when the sun is less than 18° above the horizon at Aqua's 13:30 overpass. Below that,
+          readings rise in a fake winter "bloom" in both hemispheres (we found this in the zonal means).</li>
+        <li><strong>Derived measures</strong> (computed in the browser):
+          <em>vs. annual average</em> = this month ÷ the geometric mean of all months with data at that spot.
+          <em>Peak month</em> = the month with the highest value. Both need at least 6 months of data, so
+          high-latitude cells that are dark half the year drop out. Region and latitude-band averages weight
+          each cell by cos(latitude), because cells shrink toward the poles.</li>
+        <li><strong>Caveats.</strong> Chlorophyll stands in for phytoplankton biomass. It is not a direct count.
+          Near coasts and river mouths, sediment and dissolved organic matter push the readings up. Months
+          with heavy cloud are sampled less often.</li>
+      </ul>
+
+      <h3>Design rationale</h3>
+      <p class="todo">[Team: rewrite this section in your own words. The notes below list each decision and the
+        reason for it. The rubric penalizes write-ups that read as AI-generated.]</p>
+      <ul>
+        <li><strong>Marks: a raster map plus two linked charts.</strong> Chlorophyll is a continuous field, so we
+          draw one rectangle per 0.5° cell on a canvas instead of choropleth regions. The map shows
+          <em>where</em>. The latitude × month panel shows <em>when</em> for the whole planet at once. The line
+          chart puts a few chosen places side by side so their timing can be compared.</li>
+        <li><strong>Projection.</strong> We used equirectangular (plate carrée) because it matches the data grid
+          exactly and keeps latitude on a straight vertical axis. That lets the latitude panel share the map's
+          y-axis, so any row in the panel lines up with the same latitude on the map. It exaggerates the area of
+          high-latitude oceans. We correct for that in every average with cos(latitude) weights. We considered
+          Equal Earth (area-true, but it breaks the alignment) and a rotating globe (only half the planet
+          visible, so you can't compare the hemispheres).</li>
+        <li><strong>Color: chlorophyll.</strong> The ramp runs from dark navy to blue, teal, green and pale
+          yellow-green. Lightness rises steadily, so "brighter = more chlorophyll" holds even in grayscale. The
+          hues follow what the water actually looks like: nutrient-poor water is deep blue and bloom water is
+          green. The scale is logarithmic (0.02–10 mg/m³) because values span three orders of magnitude, and a
+          linear scale would paint 90% of the ocean the same color.</li>
+        <li><strong>Color: vs. annual average.</strong> A diverging scale with a neutral gray midpoint (= the
+          usual value for that spot). Green-teal means above average (a bloom) and brown means below. The two
+          arms are matched in lightness, from ¼× to 4×. Dividing each spot by its own average removes the huge
+          coast-versus-open-ocean differences, so the timing of the seasons stands out.</li>
+        <li><strong>Color: peak month.</strong> Month is cyclical: December sits next to January. So we used a
+          cyclic hue wheel instead of a linear ramp. The color fades to gray where the seasonal swing is small,
+          because a "peak month" there is close to meaningless. This makes it a two-variable encoding: hue shows
+          timing and saturation shows how strong the season is.</li>
+        <li><strong>Highlight colors.</strong> Up to 3 pinned regions, in amber, magenta and violet. We checked
+          this trio for color-blind separation, and none of them is a hue the map ramps use. Each region also has
+          a numbered badge and a direct label on its line, so identity never relies on color alone.</li>
+        <li><strong>Interactions.</strong> A month slider with play animates the seasons, which no single static
+          map can show. The measure toggle switches between absolute amount, relative timing and peak month.
+          Click or brush on the map pins a region and adds its 12-month curve, in the spirit of NameGrapher's
+          dynamic queries. Hover tooltips give exact values and a sparkline. Hovering a latitude band highlights
+          it on the map. Clicking a month in either chart moves the map to that month. The numbered
+          <em>stories</em> set up each view, so a first-time reader lands on the main patterns quickly.</li>
+        <li><strong>Alternatives we considered.</strong> Twelve small-multiple maps: a strong static option, but
+          each map was too small to read regional detail, and you still couldn't compare exact curves. Year-by-year
+          maps with a 22-year slider: the year-to-year signal is much smaller than the seasonal one and noisy at
+          0.5°, so we kept interannual change in our exploration only. Adding sea-surface temperature as a second
+          variable: interesting, but it would have doubled the scope.</li>
+      </ul>
+
+      <h3>Development process</h3>
+      <p class="todo">[Team: fill in. The rubric asks who did what, roughly how many people-hours in total, and
+        which parts took the most time.]</p>
+      <ul>
+        <li><strong>Team members and roles:</strong> [Name — data pipeline], [Name — map and interactions],
+          [Name — seasonal chart and stories], [Name — write-up and testing].</li>
+        <li><strong>Time spent:</strong> about [N] people-hours in total.</li>
+        <li><strong>What took the most time:</strong> [e.g. turning GIBS image colors back into chlorophyll
+          values and compositing 7,300 daily swaths; syncing the brush, tooltip and month across three
+          views.]</li>
+      </ul>
+
+      <h3>Sources</h3>
+      <p>
+        NASA Global Imagery Browse Services (GIBS), layer MODIS_Aqua_L2_Chlorophyll_A and colormap
+        MODIS_Chlorophyll.xml. Land outlines: Natural Earth via <code>world-atlas</code> (1:50m).
+        Built with <a href="https://d3js.org">D3.js</a> v7 and topojson-client. The data pipeline is
+        <code>main.py</code> in this repository.
+      </p>
+    </article>
+  </main>
+
+  <footer class="foot">
+    <p>Data: NASA EOSDIS GIBS · MODIS-Aqua · 2003–2022 climatology</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
