@@ -17,8 +17,7 @@ const GRAPHS = [
     Chart: Distribution,
     note: "All ocean cell-months of the climatology, weighted by cell area (cos latitude).",
     analysis: [
-      "Most of the ocean has very little chlorophyll, but a few places have a lot. On a normal number line (left), almost all the values get squished into a few tall bars near zero, so you can't see the differences between them. On a log scale (right), each step is ten times bigger than the one before (0.01, 0.1, 1, 10), which spreads the values out into a hill shape. The middle value is about 0.12 milligrams of chlorophyll in each cubic meter of water.",
-      "This is why every chart on our site uses a log scale, and why we average our numbers in a way that suits this kind of data, so a few very green spots don't drown out everything else.",
+      "Most of the time, the ocean generally has either very low levels of chlorophyll or areas with high concentrations. So, when trying to use a regular linear scale, it becomes difficult to read the data since most of it gets crowded near zero. Using a logarithmic scale instead makes the distribution easier to read and understand. Each step represents a multiple of 10 as it increases (0.01, 0.1, 1, 10). This makes it easier to view the distribution of the data, which is why every chart on our website uses a logarithmic scale.",
     ],
   },
   {
@@ -29,8 +28,7 @@ const GRAPHS = [
     Chart: RegionalSeries,
     note: "Monthly composites, area-weighted geometric mean over each region box (North Atlantic 45–60°N 40–15°W; Southern Ocean 45–60°S 50°W–0°; Equatorial Pacific 3°S–3°N 140–100°W). Shaded: El Niño episodes (NOAA ONI). Hover anywhere to compare all three regions in the same month.",
     analysis: [
-      "These lines follow three places for 20 years. In the North Atlantic, chlorophyll rises and falls every single year, with a big peak in late spring and summer. The Southern Ocean does the same thing, but its peaks come around December, half a year later, because summer in the south happens while it is winter in the north.",
-      "Near the equator in the Pacific, the line stays fairly flat, because there are no big seasons there. Its biggest changes come in El Niño years (the gray bars), when the water near the equator warms up and chlorophyll drops, like in 2015 and 2016. So far from the equator the seasons matter most, but at the equator, El Niño matters most.",
+      "These lines follow the trends across three different locations in the ocean: the North Atlantic, the Southern Ocean, and near the equator in the Pacific. They follow these trends over the past 20 years. In the North Atlantic, chlorophyll rises and falls every year, with peaks in spring and summer. The same thing happens in the Southern Ocean, but the peak happens in December. Near the equator in the Pacific, the lines are generally flatter, with no big seasonal changes, but during El Niño years (the gray bars), chlorophyll drops. So, far from the equator, the seasons matter most, but at the equator, El Niño matters most.",
     ],
   },
   {
