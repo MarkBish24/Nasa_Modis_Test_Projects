@@ -24,7 +24,8 @@ const GRAPHS = [
   {
     id: "time-series",
     title: "Seasons vs. years",
-    subtitle: "At high latitudes the seasons dominate; at the equator, El Niño years stand out",
+    subtitle:
+      "At high latitudes the seasons dominate; at the equator, El Niño years stand out",
     Chart: RegionalSeries,
     note: "Monthly composites, area-weighted geometric mean over each region box (North Atlantic 45–60°N 40–15°W; Southern Ocean 45–60°S 50°W–0°; Equatorial Pacific 3°S–3°N 140–100°W). Shaded: El Niño episodes (NOAA ONI). Hover anywhere to compare all three regions in the same month.",
     analysis: [
@@ -57,7 +58,8 @@ const GRAPHS = [
   {
     id: "region-cycles",
     title: "Five contrasting regions",
-    subtitle: "Seasonal cycle, in absolute terms and relative to each region's own average",
+    subtitle:
+      "Seasonal cycle, in absolute terms and relative to each region's own average",
     Chart: RegionCycles,
     note: "Monthly climatology, area-weighted geometric mean over each region box. Hover a line or legend entry to highlight it; click to keep it selected, and click again to clear.",
     analysis: [
@@ -96,7 +98,11 @@ function GraphNav({ active }) {
             <button
               className={active === g.id ? "active" : ""}
               aria-current={active === g.id ? "true" : undefined}
-              onClick={() => document.getElementById(g.id)?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() =>
+                document
+                  .getElementById(g.id)
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
             >
               <span className="graph-nav-num">{i + 1}</span>
               <span>{g.title}</span>
@@ -120,7 +126,9 @@ export default function SupportingGraphs() {
     const update = () => {
       frame = 0;
       const line = window.innerHeight * 0.35;
-      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      const atBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 4;
       let current = GRAPHS[0].id;
       for (const g of GRAPHS) {
         const el = document.getElementById(g.id);
@@ -147,36 +155,47 @@ export default function SupportingGraphs() {
 
       <div className="explore-main">
         <section className="page-intro">
-          <h1>Supporting graphs</h1>
+          <h1>Supporting Graphs</h1>
           <p>
-            Before building <Link to="/visualization">our main map</Link>, we made a lot of graphs to get to know the
-            data. These five taught us the most. Together they show that the ocean doesn't bloom all at once: each
-            part of the ocean has its own season, and the northern and southern halves of the world bloom about six
-            months apart. That is what led us to our question about when and why the ocean blooms. Use the list to
-            jump to any graph.
+            Before building <Link to="/visualization">our main map</Link>, we
+            made a lot of graphs to get to know the data. These five taught us
+            the most. Together they show that the ocean doesn't bloom all at
+            once: each part of the ocean has its own season, and the northern
+            and southern halves of the world bloom about six months apart. That
+            is what led us to our question about when and why the ocean blooms.
+            Use the list to jump to any graph.
           </p>
         </section>
 
-        {state.status === "loading" && <p className="status">Loading 20 years of satellite data…</p>}
-        {state.status === "error" && <p className="status error">Couldn't load the data: {String(state.error.message ?? state.error)}</p>}
+        {state.status === "loading" && (
+          <p className="status">Loading 20 years of satellite data…</p>
+        )}
+        {state.status === "error" && (
+          <p className="status error">
+            Couldn't load the data: {String(state.error.message ?? state.error)}
+          </p>
+        )}
 
-        {state.status === "ready" && GRAPHS.map(({ id, title, subtitle, Chart, note, analysis }, i) => (
-          <article key={id} id={id} className="graph card">
-            <header>
-              <span className="graph-number">{i + 1}</span>
-              <div>
-                <h2>{title}</h2>
-                <p className="graph-subtitle">{subtitle}</p>
+        {state.status === "ready" &&
+          GRAPHS.map(({ id, title, subtitle, Chart, note, analysis }, i) => (
+            <article key={id} id={id} className="graph card">
+              <header>
+                <span className="graph-number">{i + 1}</span>
+                <div>
+                  <h2>{title}</h2>
+                  <p className="graph-subtitle">{subtitle}</p>
+                </div>
+              </header>
+              <Chart data={state.data} />
+              <p className="graph-note">{note}</p>
+              <div className="analysis">
+                <h3>What it shows</h3>
+                {analysis.map((text, k) => (
+                  <p key={k}>{text}</p>
+                ))}
               </div>
-            </header>
-            <Chart data={state.data} />
-            <p className="graph-note">{note}</p>
-            <div className="analysis">
-              <h3>What it shows</h3>
-              {analysis.map((text, k) => <p key={k}>{text}</p>)}
-            </div>
-          </article>
-        ))}
+            </article>
+          ))}
       </div>
     </div>
   );
