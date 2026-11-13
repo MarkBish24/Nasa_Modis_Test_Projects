@@ -53,36 +53,32 @@ export default function Home() {
       <section className="prose">
         <h2>About the project</h2>
         <p>
-          The ocean is full of tiny, plant-like living things called
-          phytoplankton. Each one is too small to see, but there are so many of
-          them that they make about half of the oxygen we breathe, and they are
-          the first link in the ocean's food chain. Like plants on land, they
-          use a green pigment called chlorophyll to turn sunlight into food.
-          When lots of them grow at the same time, the water turns a little
-          greener, and we call that a bloom.
+          The ocean is filled with these tiny, plant-like organisms called
+          phytoplankton, which are microscopically small and difficult to see.
+          However, there are so many of them around the world that they make up
+          about half of the oxygen we breathe. When lots of them grow at the
+          same time, the water's hue turns a little greener; that is to say,
+          they bloom.
         </p>
         <p>
-          Our project asks a simple question: when does the ocean bloom, and why
-          do different parts of the ocean bloom at different times of year? To
-          answer it, we turned 20 years of satellite pictures into maps and
-          charts you can play with. You can watch the ocean change color through
-          an average year, compare different places side by side, and find the
-          month when each part of the ocean is at its greenest.
+          Our project focuses on when the ocean blooms and why different parts
+          of the ocean bloom at different times of the year. So, we took 20
+          years of satellite imagery and converted it into maps and charts that
+          you can interact with to better watch and understand the changes in
+          chlorophyll throughout the years and see which parts of the ocean
+          bloom the most
         </p>
 
         <h2>The dataset</h2>
         <p>
-          Our data comes from NASA. A satellite called Aqua circles the Earth
-          every day carrying an instrument called MODIS, which measures the
-          color of the ocean. From that color, NASA works out how much
-          chlorophyll is in the water. NASA shares this through a service called
-          GIBS as pictures, where each color stands for an amount of
-          chlorophyll. We downloaded one picture of the whole world for every
-          day from 2003 to 2022 (7,305 pictures), used NASA's color key to turn
-          each pixel back into a number, and averaged the days into monthly
-          maps. We left out 2023 and 2024 because the satellite's orbit has
-          slowly been drifting, which makes the newest readings less
-          trustworthy.
+          The data comes from one of NASA's satellites, named Aqua, which
+          circles the globe every day with an instrument called MODIS that
+          measures the color of the ocean. Using the data from the satellite,
+          NASA determines how much chlorophyll is in the water based on the
+          color of the image. We downloaded one picture of the whole world for
+          every day from 2003 to 2022, which totals 7,305 pictures, converted
+          each image into a number, and averaged the daily data into monthly
+          maps.
         </p>
       </section>
 
