@@ -51,14 +51,16 @@ function sizeCanvas(canvas, w, h) {
  *   colorAt(p)  -> [r, g, b] for grid cell p (row-major, row 0 = 90N), or null for no data
  *   describe(p) -> tooltip text for cell p, or null for no data
  *   hoverCell, onHoverCell -> optional; link several maps' hover (see below)
+ *   boxes       -> optional [{ lon: [west, east], lat: [south, north], label }] outlines to draw
  */
-export default function RasterMap({ colorAt, describe, land, compact = false, hoverCell, onHoverCell }) {
+export default function RasterMap({ colorAt, describe, land, compact = false, hoverCell, onHoverCell, boxes }) {
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
   const landRef = useRef(null);
   const svgRef = useRef(null);
   const tipRef = useRef(null);
   const markerRef = useRef(null);
+  const boxesRef = useRef(null);
   const width = useWidth(wrapRef);
 
   const margin = compact ? { ...MARGIN, left: 30 } : MARGIN;
@@ -100,6 +102,27 @@ export default function RasterMap({ colorAt, describe, land, compact = false, ho
     ctx.strokeStyle = LAND_STROKE;
     ctx.stroke();
   }, [land, projection, plotW, plotH]);
+
+  // labelled outline boxes (e.g. the region a guided story is about)
+  useEffect(() => {
+    const svg = d3.select(boxesRef.current).attr("width", plotW).attr("height", plotH);
+    svg.selectAll("*").remove();
+    if (!plotW || !boxes?.length) return;
+    const x = (lon) => ((lon + 180) / 360) * plotW;
+    const y = (lat) => ((LAT_TOP - lat) / (LAT_TOP - LAT_BOTTOM)) * plotH;
+    const g = svg.selectAll("g").data(boxes).join("g");
+    for (const [color, sw] of [["white", 4], [INK, 2]]) {
+      g.append("rect")
+        .attr("x", (b) => x(b.lon[0])).attr("y", (b) => y(b.lat[1]))
+        .attr("width", (b) => x(b.lon[1]) - x(b.lon[0])).attr("height", (b) => y(b.lat[0]) - y(b.lat[1]))
+        .attr("fill", "none").attr("stroke", color).attr("stroke-width", sw).attr("rx", 2);
+    }
+    g.append("text")
+      .attr("x", (b) => x(b.lon[0])).attr("y", (b) => y(b.lat[1]) - 6)
+      .attr("font-size", 12).attr("font-weight", 600).attr("fill", INK)
+      .attr("stroke", "white").attr("stroke-width", 3.5).attr("paint-order", "stroke")
+      .text((b) => b.label ?? "");
+  }, [boxes, plotW, plotH]);
 
   // axis labels
   useEffect(() => {
@@ -183,6 +206,7 @@ export default function RasterMap({ colorAt, describe, land, compact = false, ho
         onMouseLeave={onLeave}
       />
       <canvas ref={landRef} className="raster-land" style={{ left: margin.left, top: margin.top }} aria-hidden="true" />
+      <svg ref={boxesRef} className="raster-marker" style={{ left: margin.left, top: margin.top }} aria-hidden="true" />
       <svg ref={markerRef} className="raster-marker" style={{ left: margin.left, top: margin.top }} aria-hidden="true" />
       <div className="tooltip" ref={tipRef} style={{ display: "none" }} />
     </div>

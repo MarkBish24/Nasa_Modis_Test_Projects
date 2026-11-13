@@ -1,30 +1,25 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useData } from "../data/load.js";
-import Placeholder from "../components/Placeholder.jsx";
-import AnnualMap from "../charts/AnnualMap.jsx";
 import Distribution from "../charts/Distribution.jsx";
 import RegionalSeries from "../charts/RegionalSeries.jsx";
 import AnomalyMaps from "../charts/AnomalyMaps.jsx";
 import LatitudeMonth from "../charts/LatitudeMonth.jsx";
-import PeakMonthMap from "../charts/PeakMonthMap.jsx";
 import RegionCycles from "../charts/RegionCycles.jsx";
 
 // Each `note` says how the data behind the graph was transformed (the rubric asks
-// for that next to the plot). `analysis` is what the team still has to write.
+// for that next to the plot). `analysis` is what the graph shows, one string per paragraph.
 const GRAPHS = [
-  {
-    id: "annual-mean",
-    title: "Where is the ocean green?",
-    subtitle: "Chlorophyll-a through an average year, 2003–2022 (press play)",
-    Chart: AnnualMap,
-    note: "Each month is the geometric mean of that calendar month over 2003–2022, per 0.5° cell. Blank = no reliable data that month (cloud, sea ice, or sun too low), which is why the poles appear and disappear with the seasons. Annual average = geometric mean of the 12 months, shown only for cells with at least 6 months of data.",
-  },
   {
     id: "distribution",
     title: "Why a log scale?",
     subtitle: "The same values on a linear and a log axis",
     Chart: Distribution,
     note: "All ocean cell-months of the climatology, weighted by cell area (cos latitude).",
+    analysis: [
+      "Most of the ocean has very little chlorophyll, but a few places have a lot. On a normal number line (left), almost all the values get squished into a few tall bars near zero, so you can't see the differences between them. On a log scale (right), each step is ten times bigger than the one before (0.01, 0.1, 1, 10), which spreads the values out into a hill shape. The middle value is about 0.12 milligrams of chlorophyll in each cubic meter of water.",
+      "This is why every chart on our site uses a log scale, and why we average our numbers in a way that suits this kind of data, so a few very green spots don't drown out everything else.",
+    ],
   },
   {
     id: "time-series",
@@ -32,6 +27,10 @@ const GRAPHS = [
     subtitle: "At high latitudes the seasons dominate; at the equator, El Niño years stand out",
     Chart: RegionalSeries,
     note: "Monthly composites, area-weighted geometric mean over each region box (North Atlantic 45–60°N 40–15°W; Southern Ocean 45–60°S 50°W–0°; Equatorial Pacific 3°S–3°N 140–100°W). Shaded: El Niño episodes (NOAA ONI). Hover anywhere to compare all three regions in the same month.",
+    analysis: [
+      "These lines follow three places for 20 years. In the North Atlantic, chlorophyll rises and falls every single year, with a big peak in late spring and summer. The Southern Ocean does the same thing, but its peaks come around December, half a year later, because summer in the south happens while it is winter in the north.",
+      "Near the equator in the Pacific, the line stays fairly flat, because there are no big seasons there. Its biggest changes come in El Niño years (the gray bars), when the water near the equator warms up and chlorophyll drops, like in 2015 and 2016. So far from the equator the seasons matter most, but at the equator, El Niño matters most.",
+    ],
   },
   {
     id: "anomaly",
@@ -39,6 +38,10 @@ const GRAPHS = [
     subtitle: "The two hemispheres are six months out of phase",
     Chart: AnomalyMaps,
     note: "Monthly climatology divided by each cell's own geometric annual mean (cells with ≥ 6 months of data). Blank = no reliable data that month (cloud, ice, or sun too low).",
+    analysis: [
+      "These four maps compare each month to what is normal for that spot. Green means more chlorophyll than usual, and brown means less. In June, the waters far to the north turn green. In December, it's the waters around Antarctica that turn green instead.",
+      "The warm middle parts of the oceans do the opposite: they get a little greener during their own winter. So the two halves of the Earth take turns, about six months apart. Hover over any spot to see its value in all four months at once.",
+    ],
   },
   {
     id: "latitude-month",
@@ -46,13 +49,10 @@ const GRAPHS = [
     subtitle: "Average chlorophyll of each latitude band, month by month",
     Chart: LatitudeMonth,
     note: "2° latitude bands, geometric mean over ocean cells with data (bands with fewer than 20 cells left blank).",
-  },
-  {
-    id: "peak-month",
-    title: "A calendar of blooms",
-    subtitle: "The month when chlorophyll peaks",
-    Chart: PeakMonthMap,
-    note: "Peak = calendar month with the highest climatological chlorophyll. Colors are smoothed with a 2.5° majority filter (each cell shows the most common peak month around it, stronger seasons weighted more); hover a cell for its own value. Gray = seasonal range (max ÷ min) under 1.5×. Cells with fewer than 6 months of data are blank.",
+    analysis: [
+      "This chart squeezes the whole world into one picture. Each row is a band of latitude (how far north or south you are), and each column is a month. On the left, the brightest greens show that the far north is greenest from about May to August, while the far south is greenest from about November to February.",
+      "The right side compares each band to its own average. It looks almost like a mirror image across the equator: when one half of the world is having its bloom, the other half is quiet. The empty areas near the top and bottom are places where it is too dark in winter for the satellite to see.",
+    ],
   },
   {
     id: "region-cycles",
@@ -60,6 +60,10 @@ const GRAPHS = [
     subtitle: "Seasonal cycle, in absolute terms and relative to each region's own average",
     Chart: RegionCycles,
     note: "Monthly climatology, area-weighted geometric mean over each region box. Hover a line or legend entry to highlight it; click to keep it selected, and click again to clear.",
+    analysis: [
+      "Here we compare five very different places. The North Atlantic grows from about 0.16 in January to 0.44 in June, while the Southern Ocean does the opposite and peaks in December. The Arabian Sea is special: it blooms twice a year, around February and again around September, because the monsoon winds switch direction and stir up the water each time. The equatorial Pacific barely changes, and the North Pacific Gyre has about ten times less chlorophyll than the others all year long.",
+      "Why do these places bloom at different times? Plankton need two things: sunlight, and nutrients (their food) that are stirred up from deep water. In winter, storms stir up plenty of nutrients, but there isn't much sunlight. In spring, the sunlight comes back while the nutrients are still there, so the plankton bloom. In calm, warm waters like the North Pacific Gyre, the nutrients stay trapped deep down, so it stays a desert.",
+    ],
   },
 ];
 
@@ -104,7 +108,7 @@ function GraphNav({ active }) {
   );
 }
 
-export default function Exploration() {
+export default function SupportingGraphs() {
   const state = useData();
   const [active, setActive] = useState(GRAPHS[0].id);
 
@@ -143,14 +147,20 @@ export default function Exploration() {
 
       <div className="explore-main">
         <section className="page-intro">
-          <h1>Exploration</h1>
-          <Placeholder paragraphs={1} hint="how these graphs led you to your question" />
+          <h1>Supporting graphs</h1>
+          <p>
+            Before building <Link to="/visualization">our main map</Link>, we made a lot of graphs to get to know the
+            data. These five taught us the most. Together they show that the ocean doesn't bloom all at once: each
+            part of the ocean has its own season, and the northern and southern halves of the world bloom about six
+            months apart. That is what led us to our question about when and why the ocean blooms. Use the list to
+            jump to any graph.
+          </p>
         </section>
 
         {state.status === "loading" && <p className="status">Loading 20 years of satellite data…</p>}
         {state.status === "error" && <p className="status error">Couldn't load the data: {String(state.error.message ?? state.error)}</p>}
 
-        {state.status === "ready" && GRAPHS.map(({ id, title, subtitle, Chart, note }, i) => (
+        {state.status === "ready" && GRAPHS.map(({ id, title, subtitle, Chart, note, analysis }, i) => (
           <article key={id} id={id} className="graph card">
             <header>
               <span className="graph-number">{i + 1}</span>
@@ -162,8 +172,8 @@ export default function Exploration() {
             <Chart data={state.data} />
             <p className="graph-note">{note}</p>
             <div className="analysis">
-              <h3>Analysis</h3>
-              <Placeholder paragraphs={2} hint={`what graph ${i + 1} shows and what you learned from it`} />
+              <h3>What it shows</h3>
+              {analysis.map((text, k) => <p key={k}>{text}</p>)}
             </div>
           </article>
         ))}

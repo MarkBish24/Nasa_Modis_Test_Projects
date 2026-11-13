@@ -1,12 +1,14 @@
-import { NavLink, Route, Routes, useLocation } from "react-router-dom";
+import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import Home from "./pages/Home.jsx";
-import Exploration from "./pages/Exploration.jsx";
+import Visualization from "./pages/Visualization.jsx";
+import SupportingGraphs from "./pages/SupportingGraphs.jsx";
 import Writeup from "./pages/Writeup.jsx";
 
 const PAGES = [
   { to: "/", label: "Project" },
-  { to: "/exploration", label: "Exploration" },
+  { to: "/visualization", label: "Visualization" },
+  { to: "/supporting", label: "Supporting graphs", short: "Graphs" }, // short label on phones
   { to: "/writeup", label: "Write-up" },
 ];
 
@@ -38,7 +40,12 @@ export default function App() {
           <nav>
             {PAGES.map((p) => (
               <NavLink key={p.to} to={p.to} end className={({ isActive }) => (isActive ? "active" : "")}>
-                {p.label}
+                {p.short ? (
+                  <>
+                    <span className="nav-long">{p.label}</span>
+                    <span className="nav-short">{p.short}</span>
+                  </>
+                ) : p.label}
               </NavLink>
             ))}
           </nav>
@@ -48,7 +55,10 @@ export default function App() {
       <main className="page">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/exploration" element={<Exploration />} />
+          <Route path="/visualization" element={<Visualization />} />
+          <Route path="/supporting" element={<SupportingGraphs />} />
+          {/* old address, so earlier links keep working */}
+          <Route path="/exploration" element={<Navigate to="/supporting" replace />} />
           <Route path="/writeup" element={<Writeup />} />
           <Route path="*" element={<Home />} />
         </Routes>

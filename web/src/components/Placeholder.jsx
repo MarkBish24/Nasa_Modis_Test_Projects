@@ -1,4 +1,4 @@
-// Stand-in text for sections the team will write. Search the codebase for
+// Marks text the team still has to finish. Search the codebase for
 // <Placeholder to find every spot that still needs real copy.
 
 const LOREM = [
@@ -8,12 +8,15 @@ const LOREM = [
   "Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.",
 ];
 
-/** `paragraphs` blocks of lorem ipsum, marked so unfinished copy is easy to spot. */
-export default function Placeholder({ paragraphs = 1, hint }) {
+/**
+ * Unfinished copy, shown with a dashed border so it is easy to spot. Shows
+ * `children` if given (e.g. a sentence with blanks), otherwise lorem ipsum.
+ */
+export default function Placeholder({ paragraphs = 1, hint, children }) {
   return (
     <div className="placeholder">
       {hint && <p className="placeholder-hint">To write: {hint}</p>}
-      {Array.from({ length: paragraphs }, (_, i) => <p key={i}>{LOREM[i % LOREM.length]}</p>)}
+      {children ?? Array.from({ length: paragraphs }, (_, i) => <p key={i}>{LOREM[i % LOREM.length]}</p>)}
     </div>
   );
 }
